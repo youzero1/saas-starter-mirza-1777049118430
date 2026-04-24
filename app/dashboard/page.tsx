@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Car } from 'lucide-react';
+import { Plus, Car, LayoutGrid, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { fetchParts, deletePart } from '@/lib/api';
 import { Part, PartFilters } from '@/types';
@@ -39,13 +39,8 @@ export default function DashboardPage() {
     },
   });
 
-  const handleEdit = (part: Part) => {
-    setEditingPart(part);
-  };
-
-  const handleDelete = (part: Part) => {
-    setDeletingPart(part);
-  };
+  const handleEdit = (part: Part) => setEditingPart(part);
+  const handleDelete = (part: Part) => setDeletingPart(part);
 
   const handleFormClose = () => {
     setIsAddModalOpen(false);
@@ -57,31 +52,37 @@ export default function DashboardPage() {
     handleFormClose();
   };
 
+  const hasFilters = Object.values(filters).some((v) => v);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Nav */}
-      <nav className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="bg-blue-600 rounded-xl p-2">
-                <Car className="w-5 h-5 text-white" />
+      <nav className="bg-white border-b border-gray-200 px-6 py-0 sticky top-0 z-30 shadow-sm">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-14">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2.5 shrink-0">
+              <div className="bg-blue-600 rounded-lg p-1.5 shadow">
+                <Car className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-gray-900">AutoParts Pro</span>
+              <span className="font-bold text-gray-900 text-sm">AutoParts Pro</span>
             </Link>
-            <span className="text-gray-300">|</span>
-            <span className="text-sm text-gray-500 font-medium">Staff Dashboard</span>
+            <div className="h-5 w-px bg-gray-200" />
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-orange-400" />
+              <span className="text-sm font-semibold text-gray-700">Staff Dashboard</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Link
               href="/catalog"
-              className="text-sm text-gray-600 hover:text-gray-900 font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-blue-600 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors"
             >
-              View Catalog
+              <LayoutGrid className="w-4 h-4" />
+              Customer Catalog
             </Link>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="btn-primary flex items-center gap-2 text-sm"
+              className="btn-primary flex items-center gap-1.5 text-sm"
             >
               <Plus className="w-4 h-4" />
               Add Part
@@ -91,12 +92,18 @@ export default function DashboardPage() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Parts Inventory</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {parts ? `${parts.length} part${parts.length !== 1 ? 's' : ''} in inventory` : 'Loading...'}
-          </p>
+        {/* Page Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Parts Inventory</h1>
+            <p className="text-gray-500 text-sm mt-0.5">
+              {isLoading
+                ? 'Loading inventory...'
+                : parts
+                ? `${parts.length} part${parts.length !== 1 ? 's' : ''} in inventory`
+                : ''}
+            </p>
+          </div>
         </div>
 
         {/* Filters */}
@@ -105,20 +112,33 @@ export default function DashboardPage() {
         {/* Content */}
         <div className="mt-6">
           {isLoading ? (
-            <div className="card p-16 flex items-center justify-center">
+            <div className="card p-20 flex items-center justify-center">
               <LoadingSpinner />
             </div>
           ) : isError ? (
-            <div className="card p-16 text-center">
-              <p className="text-red-600 font-medium">Failed to load parts. Please check your Supabase configuration.</p>
+            <div className="card p-16 flex flex-col items-center justify-center gap-3 text-center">
+              <div className="bg-red-100 rounded-full p-3">
+                <AlertCircle className="w-6 h-6 text-red-500" />
+              </div>
+              <div>
+                <p className="text-red-600 font-semibold">Failed to load parts</p>
+                <p className="text-gray-500 text-sm mt-1">Please check your Supabase configuration and try again.</p>
+              </div>
             </div>
           ) : parts && parts.length === 0 ? (
             <EmptyState
               title="No parts found"
-              description={Object.values(filters).some((v) => v) ? 'Try adjusting your search filters.' : 'Get started by adding your first part.'}
+              description={
+                hasFilters
+                  ? 'Try adjusting your search or filters.'
+                  : 'Start building your inventory by adding the first part.'
+              }
               action={
-                !Object.values(filters).some((v) => v) ? (
-                  <button onClick={() => setIsAddModalOpen(true)} className="btn-primary flex items-center gap-2">
+                !hasFilters ? (
+                  <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="btn-primary flex items-center gap-2"
+                  >
                     <Plus className="w-4 h-4" />
                     Add First Part
                   </button>

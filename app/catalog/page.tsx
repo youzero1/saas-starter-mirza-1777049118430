@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Car, Package } from 'lucide-react';
+import { Car, Settings, AlertCircle, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { fetchParts } from '@/lib/api';
 import { PartFilters } from '@/types';
@@ -28,33 +28,39 @@ export default function CatalogPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Nav */}
-      <nav className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="bg-blue-600 rounded-xl p-2">
-                <Car className="w-5 h-5 text-white" />
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm px-6 py-0">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-14">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2.5 shrink-0">
+              <div className="bg-blue-600 rounded-lg p-1.5 shadow">
+                <Car className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-gray-900">AutoParts Pro</span>
+              <span className="font-bold text-gray-900 text-sm">AutoParts Pro</span>
             </Link>
-            <span className="text-gray-300">|</span>
-            <span className="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">Customer Catalog</span>
+            <div className="h-5 w-px bg-gray-200" />
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="text-sm font-semibold text-blue-600">Customer Catalog</span>
+            </div>
           </div>
           <Link
             href="/dashboard"
-            className="text-sm text-gray-600 hover:text-gray-900 font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-1.5"
+            className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 font-medium px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            <Package className="w-4 h-4" />
+            <Settings className="w-4 h-4" />
             Staff Dashboard
           </Link>
         </div>
       </nav>
 
-      {/* Banner */}
-      <div className="bg-gradient-to-r from-blue-700 to-blue-600 text-white px-6 py-12">
+      {/* Hero Banner */}
+      <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 text-white px-6 py-14">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-extrabold mb-2">Parts Catalog</h1>
-          <p className="text-blue-200">Browse our complete inventory of car spare parts</p>
+          <p className="text-blue-200 text-xs font-semibold uppercase tracking-widest mb-2">Browse & Discover</p>
+          <h1 className="text-4xl font-extrabold mb-2 tracking-tight">Parts Catalog</h1>
+          <p className="text-blue-100/80 text-base max-w-xl">
+            Browse our complete inventory of genuine and aftermarket car spare parts. Find the right part for your vehicle.
+          </p>
         </div>
       </div>
 
@@ -62,22 +68,36 @@ export default function CatalogPage() {
         {/* Filters */}
         <SearchFilters filters={filters} onChange={setFilters} />
 
-        {/* Results count */}
-        {parts && (
-          <p className="text-sm text-gray-500 mt-4 mb-2">
-            Showing {parts.length} part{parts.length !== 1 ? 's' : ''}
-          </p>
-        )}
+        {/* Results meta */}
+        <div className="flex items-center justify-between mt-5 mb-4">
+          {parts ? (
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4 text-gray-400" />
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold text-gray-700">{parts.length}</span>{' '}
+                part{parts.length !== 1 ? 's' : ''} found
+              </p>
+            </div>
+          ) : (
+            <div />
+          )}
+        </div>
 
         {/* Content */}
-        <div className="mt-4">
+        <div>
           {isLoading ? (
-            <div className="flex items-center justify-center py-24">
+            <div className="flex items-center justify-center py-28">
               <LoadingSpinner />
             </div>
           ) : isError ? (
-            <div className="card p-16 text-center">
-              <p className="text-red-600 font-medium">Failed to load parts. Please check your configuration.</p>
+            <div className="card p-16 flex flex-col items-center justify-center gap-3 text-center">
+              <div className="bg-red-100 rounded-full p-3">
+                <AlertCircle className="w-6 h-6 text-red-500" />
+              </div>
+              <div>
+                <p className="text-red-600 font-semibold">Failed to load parts</p>
+                <p className="text-gray-500 text-sm mt-1">Please try refreshing the page.</p>
+              </div>
             </div>
           ) : parts && parts.length === 0 ? (
             <EmptyState
@@ -89,6 +109,19 @@ export default function CatalogPage() {
           )}
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 px-6 py-6 mt-12">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="bg-blue-600 rounded-lg p-1">
+              <Car className="w-3 h-3 text-white" />
+            </div>
+            <span className="text-gray-500 text-sm font-medium">AutoParts Pro</span>
+          </div>
+          <p className="text-gray-400 text-xs">© {new Date().getFullYear()} AutoParts Pro. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
